@@ -5,6 +5,14 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 DATABASE_NAME = "northwind"
 
+def database_exists(conn, dbname):
+    """Check if a database exists"""
+    cursor = conn.cursor()
+    cursor.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s;", (dbname,))
+    exists = cursor.fetchone() is not None
+    cursor.close()
+    return exists
+
 def create_database():
     """Create the Northwind database if it doesn't exist"""
     try:
@@ -17,13 +25,16 @@ def create_database():
             port=os.getenv("DB_PORT", "5432")
         )
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        
+        # Check if the database already exists
+        if database_exists(conn, DATABASE_NAME):
+            print(f"Database {DATABASE_NAME} already exists. Aborting setup.")
+            conn.close()
+            return False
+
         cursor = conn.cursor()
 
-        # Drop database if exists
-        cursor.execute(f"DROP DATABASE IF EXISTS {DATABASE_NAME};")
-        print(f"Dropped existing {DATABASE_NAME} database if it existed.")
-
-        # Create database
+        # Create the database
         cursor.execute(f"CREATE DATABASE {DATABASE_NAME};")
         print(f"Created new {DATABASE_NAME} database.")
 
@@ -70,7 +81,7 @@ def verify_database():
             dbname=DATABASE_NAME,
             user=os.getenv("DB_USER", "postgres"),
             password=os.getenv("DB_PASSWORD", "password"),
-            host=os.getenv("DB_HOST", "/cloudsql/infinitgraphprototype:us-central1:northwind"),
+            host=os.getenv("DB_HOST", "/cloudsql/infinitgraphprototype:us-central1:northwind"),  # Cloud SQL connection string or IP
             port=os.getenv("DB_PORT", "5432")
         )
         cursor = conn.cursor()
@@ -102,7 +113,7 @@ def setup_database():
     print("Starting Northwind database setup...")
 
     if not create_database():
-        print("Failed to create database. Exiting.")
+        print("Database setup aborted or failed to create database. Exiting.")
         sys.exit(1)
 
     if not load_data():
@@ -115,5 +126,3 @@ def setup_database():
 
     print("\nNorthwind database setup completed successfully!")
 
-if __name__ == "__main__":
-    setup_database()
