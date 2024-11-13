@@ -17,5 +17,8 @@ COPY . .
 # Expose the port Flask is running on
 EXPOSE 8080
 
+# Run Setup Script
+CMD ["python", "setup_database.py"]
+
 # Run the Flask app
 CMD ["python", "app.py"]
