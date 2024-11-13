@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Database configuration
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:postgres@db:5432/northwind"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql+psycopg2://postgres:password@/northwind?host=/cloudsql/infinitgraphprototype:us-central1:northwind"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
