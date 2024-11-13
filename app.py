@@ -64,4 +64,6 @@ def execute_query():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
+    from setup_database import setup_database
+    setup_database()
     app.run(host="0.0.0.0", port=8080)
